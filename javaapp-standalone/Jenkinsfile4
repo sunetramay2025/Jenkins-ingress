@@ -18,7 +18,7 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 git branch: 'k8s-jenkinspod',
-                    url: ''
+                    url: 'https://github.com/sunetramay2025/Jenkins-ingress.git'
             }
         }
 
