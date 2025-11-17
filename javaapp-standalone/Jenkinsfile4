@@ -4,11 +4,11 @@ pipeline {
 
     environment {
         // Repo settings
-        GIT_URL       = "https://github.com/Vandu0409/jenkins.git"
+        GIT_URL       = "https://github.com/sunetramay2025/Jenkins-ingress.git"
         GIT_BRANCH    = "k8s-jenkins"
 
         // ---------- ECR SETTINGS ----------
-        AWS_ACCOUNT   = "905418283021"
+        AWS_ACCOUNT   = "655445510312"
         AWS_REGION    = "ap-south-1"
 
         IMAGE_REPO    = "${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/javaapp"
