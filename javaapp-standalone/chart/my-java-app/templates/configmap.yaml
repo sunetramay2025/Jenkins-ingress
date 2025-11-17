@@ -4,4 +4,3 @@ metadata:
   name: {{ include "my-java-app.fullname" . }}-config
 data:
   APP_MESSAGE: "Hello from ConfigMap"
-
