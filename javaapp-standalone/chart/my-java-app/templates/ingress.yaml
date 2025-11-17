@@ -12,18 +12,24 @@ spec:
   ingressClassName: {{ .Values.ingress.className }}
 
   rules:
-    - http:
+    {{- range $host := .Values.ingress.hosts }}
+    - host: {{ $host.host }}
+      http:
         paths:
-          {{- range .Values.ingress.hosts }}
-          {{- range .paths }}
-          - path: {{ .path }}
-            pathType: {{ .pathType | default "Prefix" }}
+          {{- range $p := $host.paths }}
+          - path: {{ $p.path }}
+            pathType: {{ $p.pathType | default "Prefix" }}
             backend:
               service:
                 name: {{ include "my-java-app.fullname" $ }}
                 port:
                   number: {{ $.Values.service.port }}
           {{- end }}
-          {{- end }}
-{{- end }}
+    {{- end }}
 
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- toYaml .Values.ingress.tls | nindent 4 }}
+  {{- end }}
+
+{{- end }}
