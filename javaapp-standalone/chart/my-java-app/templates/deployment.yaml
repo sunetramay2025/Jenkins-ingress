@@ -4,18 +4,22 @@ metadata:
   name: {{ include "my-java-app.fullname" . }}
   labels:
     {{- include "my-java-app.labels" . | nindent 4 }}
+
 spec:
   replicas: {{ .Values.replicaCount }}
+
   selector:
     matchLabels:
       app: {{ include "my-java-app.fullname" . }}
+
   template:
     metadata:
       labels:
         app: {{ include "my-java-app.fullname" . }}
+
     spec:
       containers:
-        - name: {{ include "my-java-app.name" . }}
+        - name: app
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
 
