@@ -41,11 +41,11 @@ spec:
     command: ["/busybox/sleep"]
     args: ["999999"]
     env:
-      - name: DOCKER_CONFIG
-        value: /kaniko/.docker
+    - name: DOCKER_CONFIG
+      value: /kaniko/.docker
     volumeMounts:
-      - name: docker-config
-        mountPath: /kaniko/.docker/
+    - name: docker-config
+      mountPath: /kaniko/.docker/
 
   - name: helm
     image: alpine/helm:3.11.2
@@ -56,12 +56,12 @@ spec:
     image: jenkins/inbound-agent:latest
 
   volumes:
-    - name: docker-config
-      secret:
-        secretName: regcred
-        items:
-          - key: .dockerconfigjson
-            path: config.json
+  - name: docker-config
+    secret:
+      secretName: regcred
+      items:
+        - key: .dockerconfigjson
+          path: config.json
 """
                 }
             }
@@ -73,7 +73,7 @@ spec:
                         container("maven") {
                             sh """
                                 git clone --branch ${GIT_BRANCH} ${GIT_URL} repo
-                                ls -R repo
+                                ls -l repo
                             """
                         }
                     }
@@ -91,10 +91,11 @@ spec:
                     }
                 }
 
-                stage("Build Docker Image") {
+                stage("Docker Build Using Kaniko") {
                     steps {
                         container("kaniko") {
                             sh """
+                                echo "Logging in to ECR..."
                                 aws ecr get-login-password --region ${AWS_REGION} \
                                   | docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com
 
@@ -107,7 +108,7 @@ spec:
                     }
                 }
 
-                stage("Deploy to EKS") {
+                stage("Deploy to EKS Using Helm") {
                     steps {
                         container("helm") {
                             sh """
