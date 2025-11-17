@@ -11,7 +11,7 @@ pipeline {
         AWS_ACCOUNT   = "655445510312"
         AWS_REGION    = "ap-south-1"
 
-        IMAGE_REPO    = "${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/javaapp"
+        IMAGE_REPO    = "${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/jenkins/cicd"
         IMAGE_TAG     = "${BUILD_NUMBER}"
         FULL_IMAGE    = "${IMAGE_REPO}:${IMAGE_TAG}"
         // -----------------------------------
