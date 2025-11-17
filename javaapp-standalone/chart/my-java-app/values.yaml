@@ -1,7 +1,7 @@
 replicaCount: 2
 
 image:
-  repository: 905418283021.dkr.ecr.ap-south-1.amazonaws.com/javaapp
+  repository: 655445510312.dkr.ecr.ap-south-1.amazonaws.com/jenkins/cicd
   tag: "latest"
   pullPolicy: IfNotPresent
   pullSecrets:   
@@ -19,11 +19,11 @@ ingress:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:905418283021:certificate/2aa7fd6f-8a09-4edc-8875-43bf4a044e08
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:655445510312:certificate/324c4715-045f-4c32-bcce-d2e94d30a2e5
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80,"HTTPS":443}]'
     alb.ingress.kubernetes.io/ssl-redirect: '443'
     hosts:
-    - host: javaapp.vandana-java.shop
+    - host: javaapp.sunetra-javapractice.in
       paths:
         - path: /
           pathType: Prefix
