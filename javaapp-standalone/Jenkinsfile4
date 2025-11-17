@@ -72,7 +72,8 @@ spec:
                     steps {
                         container("maven") {
                             sh """
-                                git clone --branch ${GIT_BRANCH} ${GIT_URL} repo
+                                git clone -b ${GIT_BRANCH} --single-branch ${GIT_URL} repo
+
                                 ls -l repo
                             """
                         }
