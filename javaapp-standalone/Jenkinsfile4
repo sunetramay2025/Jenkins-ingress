@@ -4,7 +4,7 @@ pipeline {
 
     environment {
         AWS_REGION     = "ap-south-1"
-        ACCOUNT_ID     = "905418283021"
+        ACCOUNT_ID     = "655445510312"
         REPO_NAME      = "javaapp"
         IMAGE_TAG      = "${BUILD_NUMBER}"
         ECR_REPO       = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPO_NAME}"
