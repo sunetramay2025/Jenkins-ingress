@@ -41,11 +41,11 @@ spec:
     command: ["/busybox/sleep"]
     args: ["999999"]
     env:
-    - name: DOCKER_CONFIG
-      value: /kaniko/.docker
+      - name: DOCKER_CONFIG
+        value: /kaniko/.docker
     volumeMounts:
-    - name: docker-config
-      mountPath: /kaniko/.docker/
+      - name: docker-config
+        mountPath: /kaniko/.docker/
 
   - name: helm
     image: alpine/helm:3.11.2
@@ -56,19 +56,18 @@ spec:
     image: jenkins/inbound-agent:latest
 
   volumes:
-  - name: docker-config
-    secret:
-      secretName: regcred
-      items:
-        - key: .dockerconfigjson
-          path: config.json
+    - name: docker-config
+      secret:
+        secretName: regcred
+        items:
+          - key: .dockerconfigjson
+            path: config.json
 """
                 }
             }
 
             stages {
 
-                /* CHECKOUT CODE */
                 stage("Checkout Repo") {
                     steps {
                         container("maven") {
@@ -80,12 +79,7 @@ spec:
                     }
                 }
 
-                /* MAVEN BUILD */
                 stage("Build JAR") {
                     steps {
                         container("maven") {
                             sh """
-                                cd repo/javaapp-standalone
-                                mvn -Dmaven.test.skip=true clean package
-                                ls -l target
-                            """
