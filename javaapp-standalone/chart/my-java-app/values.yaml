@@ -2,13 +2,13 @@ replicaCount: 2
 
 image:
   repository: 655445510312.dkr.ecr.ap-south-1.amazonaws.com/jenkins/cicd
-  tag: ""
+  tag: ""   # Helm/Jenkins pipeline will override this
   pullPolicy: IfNotPresent
 
 service:
   type: ClusterIP
   port: 80
-  targetPort: 5000
+  targetPort: 5000   # your app listens on port 5000
 
 ingress:
   enabled: true
@@ -17,15 +17,23 @@ ingress:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
+
+    # ✅ Your correct ACM certificate
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:655445510312:certificate/324c4715-045f-4c32-bcce-d2e94d30a2e5
+
+    # Enable both HTTP + HTTPS
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80,"HTTPS":443}]'
+
+    # Force redirect HTTP → HTTPS
     alb.ingress.kubernetes.io/ssl-redirect: "443"
+
   hosts:
     - host: javaapp.sunetra-javapractice.in
       paths:
         - path: /
           pathType: Prefix
-  tls: []
+
+  tls: []    # Not needed for ALB as ACM handles TLS
 
 resources: {}
 
