@@ -15,7 +15,7 @@ spec:
     tty: true
 
   - name: docker
-    image: docker:27.1.2
+    image: dwdraju/alpine-docker-awscli
     command: ["cat"]
     tty: true
 
@@ -62,12 +62,20 @@ spec:
                     sh """
                         cd repo/javaapp-standalone
 
+                        echo "Logging into ECR..."
                         aws ecr get-login-password --region ${AWS_REGION} | \
                         docker login --username AWS --password-stdin ${IMAGE_REPO}
 
+                        echo "Building image..."
                         docker build -t javaapp:latest .
+
+                        echo "Tagging image..."
                         docker tag javaapp:latest ${IMAGE_REPO}:latest
+
+                        echo "Pushing to ECR..."
                         docker push ${IMAGE_REPO}:latest
+
+                        echo "Done."
                     """
                 }
             }
