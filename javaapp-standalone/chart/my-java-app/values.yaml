@@ -2,7 +2,7 @@ replicaCount: 2
 
 image:
   repository: 655445510312.dkr.ecr.ap-south-1.amazonaws.com/jenkins/cicd
-  tag: ""
+  tag: "latest"
   pullPolicy: IfNotPresent
 
 service:
