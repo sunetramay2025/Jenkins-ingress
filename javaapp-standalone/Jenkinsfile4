@@ -68,17 +68,19 @@ spec:
 
             stages {
 
+                /* CHECKOUT CODE */
                 stage("Checkout Repo") {
                     steps {
                         container("maven") {
                             sh """
                                 git clone --branch ${GIT_BRANCH} ${GIT_URL} repo
-                                ls -l repo
+                                ls -R repo
                             """
                         }
                     }
                 }
 
+                /* MAVEN BUILD */
                 stage("Build JAR") {
                     steps {
                         container("maven") {
@@ -87,42 +89,3 @@ spec:
                                 mvn -Dmaven.test.skip=true clean package
                                 ls -l target
                             """
-                        }
-                    }
-                }
-
-                stage("Docker Build Using Kaniko") {
-                    steps {
-                        container("kaniko") {
-                            sh """
-                                echo "Logging in to ECR..."
-                                aws ecr get-login-password --region ${AWS_REGION} \
-                                  | docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com
-
-                                /kaniko/executor \
-                                  --context=repo/javaapp-standalone \
-                                  --dockerfile=repo/javaapp-standalone/Dockerfile \
-                                  --destination=${FULL_IMAGE}
-                            """
-                        }
-                    }
-                }
-
-                stage("Deploy to EKS Using Helm") {
-                    steps {
-                        container("helm") {
-                            sh """
-                                helm upgrade --install ${RELEASE_NAME} \
-                                  repo/javaapp-standalone/chart/my-java-app \
-                                  --namespace ${K8S_NAMESPACE} \
-                                  --create-namespace \
-                                  --set image.repository=${IMAGE_REPO} \
-                                  --set image.tag=${IMAGE_TAG}
-                            """
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
