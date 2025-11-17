@@ -3,18 +3,15 @@ pipeline {
     agent none
 
     environment {
-        // Repo settings
         GIT_URL       = "https://github.com/sunetramay2025/Jenkins-ingress.git"
         GIT_BRANCH    = "k8s-jenkins"
 
-        // ---------- ECR SETTINGS ----------
         AWS_ACCOUNT   = "655445510312"
         AWS_REGION    = "ap-south-1"
 
         IMAGE_REPO    = "${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/jenkins/cicd"
         IMAGE_TAG     = "${BUILD_NUMBER}"
         FULL_IMAGE    = "${IMAGE_REPO}:${IMAGE_TAG}"
-        // -----------------------------------
 
         K8S_NAMESPACE = "javaapp"
         RELEASE_NAME  = "javaapp"
@@ -31,15 +28,13 @@ apiVersion: v1
 kind: Pod
 spec:
   serviceAccountName: jenkins-admin
+
   containers:
 
   - name: maven
     image: maven:3.9.6-eclipse-temurin-21
     command: ["sleep"]
     args: ["999999"]
-    volumeMounts:
-    - name: workspace
-      mountPath: /home/jenkins/agent
 
   - name: kaniko
     image: gcr.io/kaniko-project/executor:v1.9.0-debug
@@ -49,8 +44,6 @@ spec:
     - name: DOCKER_CONFIG
       value: /kaniko/.docker
     volumeMounts:
-    - name: workspace
-      mountPath: /home/jenkins/agent
     - name: docker-config
       mountPath: /kaniko/.docker/
 
@@ -58,25 +51,17 @@ spec:
     image: alpine/helm:3.11.2
     command: ["sleep"]
     args: ["999999"]
-    volumeMounts:
-    - name: workspace
-      mountPath: /home/jenkins/agent
 
   - name: jnlp
     image: jenkins/inbound-agent:latest
-    volumeMounts:
-    - name: workspace
-      mountPath: /home/jenkins/agent
 
   volumes:
-  - name: workspace
-    emptyDir: {}
   - name: docker-config
     secret:
       secretName: regcred
       items:
-      - key: .dockerconfigjson
-        path: config.json
+        - key: .dockerconfigjson
+          path: config.json
 """
                 }
             }
@@ -87,8 +72,7 @@ spec:
                     steps {
                         container("maven") {
                             sh """
-                                cd /home/jenkins/agent
-                                git clone --branch k8s-jenkins https://github.com/Vandu0409/jenkins.git repo
+                                git clone --branch ${GIT_BRANCH} ${GIT_URL} repo
                                 ls -l repo
                             """
                         }
@@ -99,7 +83,7 @@ spec:
                     steps {
                         container("maven") {
                             sh """
-                                cd /home/jenkins/agent/repo/javaapp-standalone
+                                cd repo/javaapp-standalone
                                 mvn -Dmaven.test.skip=true clean package
                                 ls -l target
                             """
@@ -107,26 +91,29 @@ spec:
                     }
                 }
 
-                stage("Build Docker Image (Kaniko)") {
+                stage("Docker Build Using Kaniko") {
                     steps {
                         container("kaniko") {
                             sh """
+                                echo "Logging in to ECR..."
+                                aws ecr get-login-password --region ${AWS_REGION} \
+                                  | docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com
+
                                 /kaniko/executor \
-                                  --dockerfile=/home/jenkins/agent/repo/javaapp-standalone/Dockerfile \
-                                  --context=/home/jenkins/agent/repo/javaapp-standalone \
-                                  --destination=${FULL_IMAGE} \
-                                  --single-snapshot
+                                  --context=repo/javaapp-standalone \
+                                  --dockerfile=repo/javaapp-standalone/Dockerfile \
+                                  --destination=${FULL_IMAGE}
                             """
                         }
                     }
                 }
 
-                stage("Deploy to Kubernetes via Helm") {
+                stage("Deploy to EKS Using Helm") {
                     steps {
                         container("helm") {
                             sh """
                                 helm upgrade --install ${RELEASE_NAME} \
-                                  /home/jenkins/agent/repo/javaapp-standalone/chart/my-java-app \
+                                  repo/javaapp-standalone/chart/my-java-app \
                                   --namespace ${K8S_NAMESPACE} \
                                   --create-namespace \
                                   --set image.repository=${IMAGE_REPO} \
